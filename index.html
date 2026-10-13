@@ -58,6 +58,33 @@
         </div>
       </section>
 
+      <section class="planner-section" aria-labelledby="planner-title">
+        <div class="queue-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">YOUR CONTENT CALENDAR</p>
+              <h2 id="planner-title">Posting schedule <span id="scheduled-count" class="count">0</span></h2>
+            </div>
+          </div>
+          <button id="enable-reminders" class="text-button" type="button">Enable reminders</button>
+        </div>
+        <p class="planner-note">Plan a post and get a reminder while this page is open. Looplist never posts for you.</p>
+        <form id="schedule-form" class="schedule-form" novalidate>
+          <label class="sr-only" for="post-idea">Video idea</label>
+          <input id="post-idea" name="post-idea" type="text" maxlength="120" placeholder="What are you planning to post?" required>
+          <label class="sr-only" for="post-time">Planned date and time</label>
+          <input id="post-time" name="post-time" type="datetime-local" required>
+          <button class="primary-button" type="submit"><span aria-hidden="true">＋</span> Schedule</button>
+        </form>
+        <p id="schedule-message" class="form-message" role="status" aria-live="polite">Reminders are local to this browser and work only while this page is open.</p>
+        <div id="schedule-list" class="schedule-list"></div>
+        <div id="schedule-empty" class="empty-state schedule-empty">
+          <span class="empty-icon" aria-hidden="true">◷</span>
+          <h3>No posts planned yet.</h3>
+          <p>Add a video idea and choose when you want to post it.</p>
+        </div>
+      </section>
+
       <details class="credentials">
         <summary>
           <span>
