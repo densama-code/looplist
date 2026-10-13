@@ -17,6 +17,13 @@ const scheduleList = document.querySelector('#schedule-list');
 const scheduleEmpty = document.querySelector('#schedule-empty');
 const scheduledCount = document.querySelector('#scheduled-count');
 const enableRemindersButton = document.querySelector('#enable-reminders');
+const simulatorForm = document.querySelector('#simulator-form');
+const simulatorMessage = document.querySelector('#simulator-message');
+const simulationResults = document.querySelector('#simulation-results');
+const completionRate = document.querySelector('#completion-rate');
+const averageWatchTime = document.querySelector('#average-watch-time');
+const resultSampleSize = document.querySelector('#result-sample-size');
+const retentionChart = document.querySelector('#retention-chart');
 
 function showMessage(message, type = '') {
   formMessage.textContent = message;
@@ -186,6 +193,76 @@ function renderSchedule() {
   }
 }
 
+function createSeededRandom(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6D2B79F5) | 0;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function showSimulatorMessage(message, type = '') {
+  simulatorMessage.textContent = message;
+  simulatorMessage.className = `form-message${type ? ` ${type}` : ''}`;
+}
+
+function renderRetentionResults({ sampleSize, videoLength, hookStrength, seed }) {
+  const random = createSeededRandom(seed);
+  const thresholds = [0.25, 0.5, 0.75, 1];
+  const buckets = [0, 0, 0, 0, 0];
+  let completed = 0;
+  let totalWatchSeconds = 0;
+
+  for (let session = 0; session < sampleSize; session += 1) {
+    let watchSeconds = 0;
+    for (let elapsed = 0; elapsed < videoLength; elapsed += 5) {
+      const fatigue = (elapsed / videoLength) * 0.035;
+      const durationEffect = (videoLength / 180) * 0.03;
+      const dropoffChance = 0.22 - hookStrength * 0.025 + durationEffect + fatigue;
+      if (random() < dropoffChance) break;
+      watchSeconds += Math.min(5, videoLength - elapsed);
+    }
+
+    const fractionWatched = watchSeconds / videoLength;
+    totalWatchSeconds += watchSeconds;
+    if (fractionWatched >= 1) completed += 1;
+    const bucket = thresholds.findIndex(threshold => fractionWatched < threshold);
+    buckets[bucket === -1 ? buckets.length - 1 : bucket] += 1;
+  }
+
+  const completionPercentage = (completed / sampleSize) * 100;
+  completionRate.textContent = `${completionPercentage.toFixed(1)}%`;
+  averageWatchTime.textContent = `${(totalWatchSeconds / sampleSize).toFixed(1)} sec`;
+  resultSampleSize.textContent = sampleSize.toLocaleString();
+  retentionChart.replaceChildren();
+
+  const labels = ['0–24%', '25–49%', '50–74%', '75–99%', '100%'];
+  for (let index = 0; index < buckets.length; index += 1) {
+    const row = document.createElement('div');
+    row.className = 'retention-row';
+    const label = document.createElement('span');
+    label.className = 'retention-label';
+    label.textContent = labels[index];
+    const track = document.createElement('span');
+    track.className = 'retention-track';
+    const bar = document.createElement('span');
+    bar.className = 'retention-bar';
+    bar.style.width = `${(buckets[index] / sampleSize) * 100}%`;
+    track.append(bar);
+    const count = document.createElement('span');
+    count.className = 'retention-count';
+    count.textContent = `${buckets[index].toLocaleString()} (${((buckets[index] / sampleSize) * 100).toFixed(1)}%)`;
+    row.append(label, track, count);
+    retentionChart.append(row);
+  }
+
+  simulationResults.hidden = false;
+  showSimulatorMessage(`Simulation complete · ${videoLength}s video · opening strength ${hookStrength}/5 · seed ${seed}.`);
+}
+
 function safeVideoUrl(value) {
   try {
     const url = new URL(value.trim());
@@ -344,6 +421,28 @@ enableRemindersButton.addEventListener('click', async () => {
   } catch (error) {
     showScheduleMessage(`Could not enable browser reminders: ${error.message}`, 'error');
   }
+});
+
+simulatorForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const sampleSize = Number(document.querySelector('#sample-size').value);
+  const videoLength = Number(document.querySelector('#video-length').value);
+  const hookStrength = Number(document.querySelector('#hook-strength').value);
+  const seed = Number(document.querySelector('#simulation-seed').value);
+  if (!Number.isInteger(sampleSize) || sampleSize < 100 || sampleSize > 5000) {
+    showSimulatorMessage('Choose a whole-number sample size from 100 to 5,000.', 'error');
+    return;
+  }
+  if (!Number.isInteger(seed) || seed < 1 || seed > 4_294_967_295) {
+    showSimulatorMessage('Choose a whole-number seed from 1 to 4,294,967,295.', 'error');
+    return;
+  }
+  if (![15, 30, 60, 90].includes(videoLength) || hookStrength < 1 || hookStrength > 5) {
+    showSimulatorMessage('Choose a listed video length and an opening strength from 1 to 5.', 'error');
+    return;
+  }
+
+  renderRetentionResults({ sampleSize, videoLength, hookStrength, seed });
 });
 
 document.querySelector('#clear-credentials').addEventListener('click', () => {
