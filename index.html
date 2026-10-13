@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f5f2">
+    <title>Looplist — TikTok watchlist</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Looplist home">
+          <span class="brand-mark" aria-hidden="true">↗</span>
+          <span>looplist</span>
+        </a>
+        <span class="local-badge"><span class="status-dot"></span> Saved on this device</span>
+      </header>
+
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">YOUR PERSONAL VIDEO QUEUE</p>
+        <h1 id="page-title">Watch what<br>you <span>meant to.</span></h1>
+        <p class="lede">Keep TikTok videos in one place and watch them on your own time. No auto-play, simulated views, or account activity.</p>
+      </section>
+
+      <section class="add-card" aria-labelledby="add-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ADD TO YOUR QUEUE</p>
+            <h2 id="add-title">Save a video</h2>
+          </div>
+          <span class="step-mark" aria-hidden="true">01</span>
+        </div>
+        <form id="add-form" novalidate>
+          <label class="sr-only" for="video-url">TikTok video URL</label>
+          <input id="video-url" name="video-url" type="url" placeholder="Paste a TikTok video link" autocomplete="url" required>
+          <button class="primary-button" type="submit"><span aria-hidden="true">＋</span> Add video</button>
+        </form>
+        <p id="form-message" class="form-message" role="status" aria-live="polite">Use a link from tiktok.com, vm.tiktok.com, or vt.tiktok.com.</p>
+      </section>
+
+      <section class="queue-section" aria-labelledby="queue-title">
+        <div class="queue-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">YOUR LIST</p>
+              <h2 id="queue-title">Up next <span id="pending-count" class="count">0</span></h2>
+            </div>
+          </div>
+          <button id="clear-completed" class="text-button" type="button" hidden>Clear watched</button>
+        </div>
+        <div id="video-list" class="video-list"></div>
+        <div id="empty-state" class="empty-state">
+          <span class="empty-icon" aria-hidden="true">↘</span>
+          <h3>Your queue is clear.</h3>
+          <p>Drop in a video link above and it’ll be waiting here when you are.</p>
+        </div>
+      </section>
+
+      <details class="credentials">
+        <summary>
+          <span>
+            <span class="eyebrow">OPTIONAL</span>
+            <span class="credentials-title">TikTok developer credentials</span>
+          </span>
+          <span class="disclosure-icon" aria-hidden="true">＋</span>
+        </summary>
+        <div class="credentials-body">
+          <p>This watchlist does not connect to TikTok APIs. API credentials cannot make TikTok videos play or count as watched. These fields are for reference only and are never sent or saved. Don’t enter a production secret into an app that you haven’t reviewed.</p>
+          <label for="client-key">Client key</label>
+          <input id="client-key" type="text" autocomplete="off" spellcheck="false" placeholder="Your TikTok app client key">
+          <label for="client-secret">Client secret</label>
+          <input id="client-secret" type="password" autocomplete="new-password" placeholder="Your TikTok app client secret">
+          <button id="clear-credentials" class="text-button clear-credentials" type="button">Clear fields</button>
+        </div>
+      </details>
+
+      <footer>
+        <span>Made for intentional watching.</span>
+        <span>Your list stays in this browser.</span>
+      </footer>
+    </main>
+  </body>
+</html>
